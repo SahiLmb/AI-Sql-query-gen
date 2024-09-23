@@ -29,8 +29,8 @@ def get_db_connection():
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 generation_config = {
-    "temperature": 0.7,
-    "top_p": 0.95,
+    "temperature": 0.5,
+    "top_p": 0.90,
     "top_k": 0,
     "max_output_tokens": 8192
 }
