@@ -1,14 +1,20 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
+from .database import Base, engine, get_db
+from .models import User, Database, Query
+from sqlalchemy.orm import Session
 
 load_dotenv()
 
 app = FastAPI()
+
+# Automatically create the tables in PostgreSQL using the models
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,6 +23,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Database and previous queries history
+uploaded_databases = []  # Store the list of uploaded database files
+conversation_history = []  # Store user queries and responses
 
 # Initialize generative AI
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -34,115 +44,40 @@ safety_settings = [
 ]
 model = genai.GenerativeModel(model_name="gemini-pro", generation_config=generation_config, safety_settings=safety_settings)
 
-# Connect to SQLite
-def get_db_connection():
-    conn = sqlite3.connect("multiinfo.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# Create a table for storing queries and uploaded databases
-def create_tables():
-    conn = get_db_connection()
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS queries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_input TEXT NOT NULL,
-        response TEXT NOT NULL
-    );
-    """)
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS uploaded_databases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        filename TEXT NOT NULL,
-        structure TEXT NOT NULL
-    );
-    """)
-    conn.commit()
-    conn.close()
-
-# Run the function to ensure the table exists
-create_tables()
-
 class QueryRequest(BaseModel):
     user_input: str = Form(...)
 
-# Handle database uploads and record structure in the database
+# Handle file upload and keep track of uploaded databases
 @app.post("/upload-database/")
-async def upload_database(file: UploadFile = File(...)):
-    db_path = f"uploaded_{file.filename}"
-    with open(db_path, "wb") as buffer:
-        buffer.write(file.file.read())
-        
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    
-    # Get all table names and columns
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
-    
-    db_structure = {}
-    for table in tables:
-        table_name = table[0]
-        cursor.execute(f"PRAGMA table_info({table_name});")
-        columns = cursor.fetchall()
-        column_names = [col[1] for col in columns]
-        db_structure[table_name] = column_names
-        
-    conn.close()
-    
-    # Store the uploaded database structure in SQLite
-    conn = get_db_connection()
-    conn.execute("INSERT INTO uploaded_databases (filename, structure) VALUES (?, ?)", (file.filename, str(db_structure)))
-    conn.commit()
-    conn.close()
-    
-    return {"message": "Database uploaded and structure extracted", "structure": db_structure}
+async def upload_database(file_name: str, file_path: str, db: Session = Depends(get_db)):
+    # Save the uploaded database details
+    new_database = Database(file_name=file_name, file_path=file_path, user_id=1)  # Assuming a user ID for now
+    db.add(new_database)
+    db.commit()
+    return {"message": "Database uploaded successfully"}
 
-# Fetch all previous queries and responses from the database
-@app.get("/previous-queries/")
-async def get_previous_queries():
-    conn = get_db_connection()
-    queries = conn.execute("SELECT user_input, response FROM queries").fetchall()
-    conn.close()
+# Handle user query submission and record the conversation
+@app.post("/query/")
+async def query_database(query_text: str, response_text: str, db: Session = Depends(get_db)):
+    # Save the user query and its response
+    new_query = Query(query_text=query_text, response_text=response_text, user_id=1, database_id=1)  # Assuming IDs for now
+    db.add(new_query)
+    db.commit()
+    return {"message": "Query executed and saved successfully"}
 
-    if queries:
-        return {"conversation_history": [dict(query) for query in queries]}
-    
-    return {"message": "No queries have been made yet."}
-
-# Fetch the list of uploaded databases and their structures
+# Get the list of uploaded databases
 @app.get("/uploaded-databases/")
 async def get_uploaded_databases():
-    conn = get_db_connection()
-    databases = conn.execute("SELECT filename, structure FROM uploaded_databases").fetchall()
-    conn.close()
-
-    if databases:
-        return {"uploaded_databases": [dict(db) for db in databases]}
-    
+    if uploaded_databases:
+        return {"uploaded_databases": uploaded_databases}
     return {"message": "No databases have been uploaded yet."}
 
-# Handle user query submission and record the conversation in the database
-@app.post("/query/")
-async def query_database(request: QueryRequest):
-    user_input = request.user_input
-    
-    # Generate SQL query using AI model
-    sql_query = generate_sql_query(user_input)
-    
-    # Execute the query and get results
-    query_results = execute_sql_query(sql_query)
-
-    # Format the response into a conversational form
-    formatted_answer = format_response(user_input, query_results)
-    
-    # Save the query and response in the database
-    conn = get_db_connection()
-    conn.execute("INSERT INTO queries (user_input, response) VALUES (?, ?)", (user_input, formatted_answer))
-    conn.commit()
-    conn.close()
-
-    return {"response": formatted_answer}
+# Get the list of previous queries
+@app.get("/previous-queries/")
+async def get_previous_queries():
+    if conversation_history:
+        return {"conversation_history": conversation_history}
+    return {"message": "No queries have been made yet."}
 
 def generate_sql_query(user_input):
     prompt = (f"Generate an SQL query to find information based on the user's question: '{user_input}'. "
