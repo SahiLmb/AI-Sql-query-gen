@@ -38,6 +38,28 @@ safety_settings = [
 ]
 model = genai.GenerativeModel(model_name="gemini-pro", generation_config=generation_config, safety_settings=safety_settings)
 
+# Connect to SQLite
+def get_db_connection():
+    conn = sqlite3.connect("multiinfo.db")
+    conn.row_factory = sqlite3.Row  # This will allow for dict-like access to rows
+    return conn
+
+# Create a table for storing queries and responses
+def create_query_table():
+    conn = get_db_connection()
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS queries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_input TEXT NOT NULL,
+        response TEXT NOT NULL
+    );
+    """)
+    conn.commit()
+    conn.close()
+
+# Run the function to ensure the table exists
+create_query_table()
+
 class QueryRequest(BaseModel):
     user_input: str = Form(...)
 
@@ -52,13 +74,35 @@ async def upload_database(file: UploadFile = File(...)):
     
     uploaded_databases.append(file.filename)  # Add the uploaded database to the list
 
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Get all table names and columns
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    
+    db_structure = {}
+    for table in tables:
+        table_name = table[0]
+        cursor.execute(f"PRAGMA table_info({table_name});")
+        columns = cursor.fetchall()
+        column_names = [col[1] for col in columns]
+        db_structure[table_name] = column_names
+        
+    conn.close()
+    
+    # Store the uploaded database structure in SQLite
+    conn = get_db_connection()
+    conn.execute("INSERT INTO uploaded_databases (filename, structure) VALUES (?, ?)", (file.filename, str(db_structure)))
+    conn.commit()
+    conn.close()
+    
     return {"message": "Database uploaded successfully", "filename": file.filename}
 
 # Handle user query submission and record the conversation
 @app.post("/query/")
 async def query_database(request: QueryRequest):
     user_input = request.user_input
-    conversation_history.append({"query": user_input})  # Add the query to the conversation history
     
     # Generate SQL query using AI model
     sql_query = generate_sql_query(user_input)
@@ -69,23 +113,36 @@ async def query_database(request: QueryRequest):
     # Format the response into a conversational form
     formatted_answer = format_response(user_input, query_results)
     
-    # Save the formatted answer in conversation history
-    conversation_history[-1]["answer"] = formatted_answer
+  # Save the query and response in the database
+    conn = get_db_connection()
+    conn.execute("INSERT INTO queries (user_input, response) VALUES (?, ?)", (user_input, formatted_answer))
+    conn.commit()
+    conn.close()
 
     return {"response": formatted_answer}
 
 # Get the list of uploaded databases
 @app.get("/uploaded-databases/")
 async def get_uploaded_databases():
-    if uploaded_databases:
-        return {"uploaded_databases": uploaded_databases}
+    conn = get_db_connection()
+    databases = conn.execute("SELECT filename, structure FROM uploaded_databases").fetchall()
+    conn.close()
+
+    if databases:
+        return {"uploaded_databases": [dict(db) for db in databases]}
+    
     return {"message": "No databases have been uploaded yet."}
 
 # Get the list of previous queries
 @app.get("/previous-queries/")
 async def get_previous_queries():
-    if conversation_history:
-        return {"conversation_history": conversation_history}
+    conn = get_db_connection()
+    queries = conn.execute("SELECT user_input, response FROM queries").fetchall()
+    conn.close()
+
+    if queries:
+        return {"conversation_history": [dict(query) for query in queries]}
+    
     return {"message": "No queries have been made yet."}
 
 def generate_sql_query(user_input):
