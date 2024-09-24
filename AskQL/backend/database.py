@@ -9,7 +9,7 @@ cursor= connection.cursor()
 
 # Create the table
 table_info="""
-CREATE TABLE PropertyRecords (
+CREATE TABLE IF NOT EXISTS PropertyRecords (
     PropertyID INT PRIMARY KEY,
     OwnerName VARCHAR(100),
     Address VARCHAR(255),
@@ -33,7 +33,7 @@ data = [
 ]
     
 # Insert the data
-cursor.executemany("INSERT INTO PropertyRecords VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
+cursor.executemany("INSERT OR IGNORE INTO PropertyRecords VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
 
 # Create the HealthcareRecords table
 table_info_healthcare = """
@@ -58,7 +58,7 @@ data_healthcare = [
     (4, 'Sneha Patel', 52, 'Female', 'Arthritis', 'Physical Therapy', 'Dr. Gupta', '2021-08-19'),
     (5, 'Manoj Joshi', 63, 'Male', 'Heart Disease', 'Surgery', 'Dr. Verma', '2020-02-14')
 ]
-cursor.executemany("INSERT INTO HealthcareRecords VALUES (?, ?, ?, ?, ?, ?, ?, ?)", data_healthcare)
+cursor.executemany("INSERT OR IGNORE INTO HealthcareRecords VALUES (?, ?, ?, ?, ?, ?, ?, ?)", data_healthcare)
 
 # Create the FinanceRecords table
 table_info_finance = """
@@ -82,7 +82,7 @@ data_finance = [
     (4, 'Neha Singh', 'Real Estate', 500000.00, 15.0, '2018-11-20', '2023-11-20'),
     (5, 'Vikas Dubey', 'Gold', 300000.00, 6.0, '2017-08-05', '2022-08-05')
 ]
-cursor.executemany("INSERT INTO FinanceRecords VALUES (?, ?, ?, ?, ?, ?, ?)", data_finance)
+cursor.executemany("INSERT OR IGNORE INTO FinanceRecords VALUES (?, ?, ?, ?, ?, ?, ?)", data_finance)
 
 # Commit the changes and close the connection
 connection.commit()

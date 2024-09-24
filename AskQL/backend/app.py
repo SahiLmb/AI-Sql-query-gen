@@ -1,20 +1,14 @@
-from fastapi import FastAPI, File, UploadFile, Form, Depends
+from fastapi import FastAPI, File, UploadFile, Form
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
-from .database import Base, engine, get_db
-from .models import User, Database, Query
-from sqlalchemy.orm import Session
 
 load_dotenv()
 
 app = FastAPI()
-
-# Automatically create the tables in PostgreSQL using the models
-Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,21 +43,36 @@ class QueryRequest(BaseModel):
 
 # Handle file upload and keep track of uploaded databases
 @app.post("/upload-database/")
-async def upload_database(file_name: str, file_path: str, db: Session = Depends(get_db)):
-    # Save the uploaded database details
-    new_database = Database(file_name=file_name, file_path=file_path, user_id=1)  # Assuming a user ID for now
-    db.add(new_database)
-    db.commit()
-    return {"message": "Database uploaded successfully"}
+async def upload_database(file: UploadFile = File(...)):
+    db_path = f"databases/{file.filename}"  # Save the file in a 'databases' directory
+    os.makedirs('databases', exist_ok=True)  # Ensure the directory exists
+
+    with open(db_path, "wb") as buffer:
+        buffer.write(file.file.read())
+    
+    uploaded_databases.append(file.filename)  # Add the uploaded database to the list
+
+    return {"message": "Database uploaded successfully", "filename": file.filename}
 
 # Handle user query submission and record the conversation
 @app.post("/query/")
-async def query_database(query_text: str, response_text: str, db: Session = Depends(get_db)):
-    # Save the user query and its response
-    new_query = Query(query_text=query_text, response_text=response_text, user_id=1, database_id=1)  # Assuming IDs for now
-    db.add(new_query)
-    db.commit()
-    return {"message": "Query executed and saved successfully"}
+async def query_database(request: QueryRequest):
+    user_input = request.user_input
+    conversation_history.append({"query": user_input})  # Add the query to the conversation history
+    
+    # Generate SQL query using AI model
+    sql_query = generate_sql_query(user_input)
+    
+    # Execute the query and get results
+    query_results = execute_sql_query(sql_query)
+
+    # Format the response into a conversational form
+    formatted_answer = format_response(user_input, query_results)
+    
+    # Save the formatted answer in conversation history
+    conversation_history[-1]["answer"] = formatted_answer
+
+    return {"response": formatted_answer}
 
 # Get the list of uploaded databases
 @app.get("/uploaded-databases/")
