@@ -15,9 +15,13 @@ const MultiPDFPage = () => {
     const [editedQuestion, setEditedQuestion] = useState(''); // To store the edited question text
 
     const { signOut } = useClerk(); // Clerk sign-out functionality
-
-
     const inputRef = useRef(null); // Reference for the input field
+
+
+     // Handle template question click
+  const handleTemplateClick = (selectedQuestion) => {
+    setQuestion(selectedQuestion); // Set the question input to the selected template question
+  };
 
     // Handle PDF file selection
     const handleFileChange = (event) => {
@@ -60,26 +64,16 @@ const MultiPDFPage = () => {
         }
     };
 
-    // Handle asking a question from the templates and from user's own qs.
-    const askQuestion = async (newQuestion) => {
-        const questionToAsk = newQuestion || question; // If newQuestion is provided, use it
-        if (!questionToAsk.trim()) {
+    // Handle asking a question
+    const askQuestion = async () => {
+        if (!question.trim()) {
             alert("Please enter a question.");
             return;
         }
-
-        // Add the question to the conversation state immediately
-        const conversationId = conversation.length; // Use index as ID
-        setConversation((prev) => [
-            ...prev,
-            { question: questionToAsk, response: "Loading...", id: conversationId },
-        ]);
-        setQuestion(''); // Clear input box
-
         setLoading(true);
         try {
             const requestBody = {
-                question: questionToAsk,
+                question,
                 use_default: useDefaultPDF,
             };
             const response = await fetch('http://localhost:8000/ask_question/', {
@@ -95,20 +89,14 @@ const MultiPDFPage = () => {
                 throw new Error(result.error || "Failed to get a response");
             }
 
-            // Update the response in the conversation once received
-            setConversation((prev) =>
-                prev.map((chat, index) =>
-                    index === conversationId ? { ...chat, response: result.response } : chat
-                )
-            );
+            // Add the question and response to the conversation
+            setConversation((prev) => [
+                ...prev,
+                { question, response: result.response },
+            ]);
+            setQuestion(''); // Clear input
         } catch (error) {
             console.error('Error asking question:', error);
-            // Handle the error state in conversation
-            setConversation((prev) =>
-                prev.map((chat, index) =>
-                    index === conversationId ? { ...chat, response: "Error getting response" } : chat
-                )
-            );
         } finally {
             setLoading(false);
         }
@@ -180,8 +168,7 @@ const saveEditedQuestion = async (index) => {
             {/* Toggle between Default PDF and Uploaded PDFs */}
 
             {/* Template Questions */}
-            <TemplateQuestions onTemplateClick={askQuestion} />
-
+            <TemplateQuestions onTemplateClick={handleTemplateClick} />
             <div className="mb-4">
                 <label className="inline-flex items-center">
                     <input
@@ -190,7 +177,7 @@ const saveEditedQuestion = async (index) => {
                         onChange={() => setUseDefaultPDF(!useDefaultPDF)}
                         className="form-checkbox h-5 w-5 text-blue-600"
                     />
-                    <span className="ml-2 text-gray-700">National Education Policy 2020(default pdf)</span>
+                    <span className="ml-2 text-gray-700">Use Default PDF</span>
                 </label>
             </div>
             {/* File upload section */}
@@ -284,8 +271,8 @@ const saveEditedQuestion = async (index) => {
                 </button>
             </div>
 
-    {/* Sign Out Button */}
-    <button onClick={signOut} className="mt-6 bg-gray-800 text-white py-2 px-4 rounded">
+       {/* Sign Out Button */}
+       <button onClick={signOut} className="mt-6 bg-gray-800 text-white py-2 px-4 rounded">
         Sign Out
       </button>
     </div>
