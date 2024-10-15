@@ -1,278 +1,271 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FiCopy, FiEdit } from 'react-icons/fi'; // Import icons from react-icons
+import { FiArrowRight, FiCopy, FiEdit, FiUpload } from 'react-icons/fi';
+import { FaSpinner } from 'react-icons/fa';
 import TemplateQuestions from '../components/TemplateQuestions';
 import { useClerk } from '@clerk/nextjs';
 
 const MultiPDFPage = () => {
-    const [pdfFiles, setPdfFiles] = useState([]);
-    const [question, setQuestion] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [conversation, setConversation] = useState([]); // Store previous conversation
-    const [useDefaultPDF, setUseDefaultPDF] = useState(true); // Toggle between default PDF and uploaded PDFs
-    const [editIndex, setEditIndex] = useState(null); // To track the index of the question being edited
-    const [editedQuestion, setEditedQuestion] = useState(''); // To store the edited question text
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const [question, setQuestion] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [conversation, setConversation] = useState([]);
+  const [useDefaultPDF, setUseDefaultPDF] = useState(true);
+  const [isChatMode, setIsChatMode] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+  const [editedQuestion, setEditedQuestion] = useState('');
 
-    const { signOut } = useClerk(); // Clerk sign-out functionality
-    const inputRef = useRef(null); // Reference for the input field
+  const { signOut } = useClerk();
+  const inputRef = useRef(null);
 
-
-     // Handle template question click
   const handleTemplateClick = (selectedQuestion) => {
-    setQuestion(selectedQuestion); // Set the question input to the selected template question
+    setQuestion(selectedQuestion);
   };
 
-    // Handle PDF file selection
-    const handleFileChange = (event) => {
-        setPdfFiles(Array.from(event.target.files));
-        setUseDefaultPDF(false); // Switch to user-uploaded PDFs
-    };
+  const handleFileChange = (event) => {
+    setPdfFiles(Array.from(event.target.files));
+    setUseDefaultPDF(false);
+  };
 
-    // Handle question input change
-    const handleQuestionChange = (event) => {
-        setQuestion(event.target.value);
-    };
+  const handleQuestionChange = (event) => {
+    setQuestion(event.target.value);
+  };
 
-    // Handle file upload
-    const uploadFiles = async () => {
-        if (pdfFiles.length === 0) {
-            alert('Please upload at least one PDF file.');
-            return;
-        }
-
-        setLoading(true);
-        const formData = new FormData();
-        pdfFiles.forEach((file) => {
-            formData.append('files', file);
-        });
-
-        try {
-            const response = await fetch('http://localhost:8000/process_pdfs/', {
-                method: 'POST',
-                body: formData,
-            });
-
-            const result = await response.json();
-            if (result.status === 'success') {
-                alert('PDFs processed successfully!');
-            }
-        } catch (error) {
-            console.error('Error uploading files:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Handle asking a question
-    const askQuestion = async () => {
-        if (!question.trim()) {
-            alert("Please enter a question.");
-            return;
-        }
-        setLoading(true);
-        try {
-            const requestBody = {
-                question,
-                use_default: useDefaultPDF,
-            };
-            const response = await fetch('http://localhost:8000/ask_question/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            });
-
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || "Failed to get a response");
-            }
-
-            // Add the question and response to the conversation
-            setConversation((prev) => [
-                ...prev,
-                { question, response: result.response },
-            ]);
-            setQuestion(''); // Clear input
-        } catch (error) {
-            console.error('Error asking question:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Copy text to clipboard
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Copied to clipboard!');
-        });
-    };
-
-    // Handle inline question edit
-    const startEditing = (index, currentQuestion) => {
-        setEditIndex(index); // Set the index of the question being edited
-        setEditedQuestion(currentQuestion); // Set the current question in the edit state
-    };
-
-// Save the edited question and re-fetch the AI response
-const saveEditedQuestion = async (index) => {
-    if (editedQuestion.trim()) {
-        setLoading(true);
-        try {
-            const requestBody = {
-                question: editedQuestion,
-                use_default: useDefaultPDF,
-            };
-            const response = await fetch('http://localhost:8000/ask_question/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            });
-
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || "Failed to get a response");
-            }
-
-            const updatedConversation = [...conversation];
-            updatedConversation[index] = {
-                question: editedQuestion,
-                response: result.response,
-            };
-            setConversation(updatedConversation);
-            setEditIndex(null); // Exit edit mode
-            setEditedQuestion(''); // Clear edit state
-        } catch (error) {
-            console.error('Error fetching response for edited question:', error);
-        } finally {
-            setLoading(false);
-        }
+  const handleFileChangeAndProcess = async (event) => {
+    setLoading(true);
+    const files = Array.from(event.target.files);
+    setPdfFiles(files);
+    setUseDefaultPDF(false);
+  
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+  
+    try {
+      const response = await fetch('http://localhost:8000/process_pdfs/', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      const result = await response.json();
+      if (response.ok && result.status === 'success') {
+        alert('PDFs uploaded and processed successfully!');
+      } else {
+        throw new Error(result.error || 'Failed to process PDFs');
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      alert('Error processing PDFs. Please try again.');
+    } finally {
+      setLoading(false);
     }
-};
+  };
 
-    // Focus input and set cursor at the end of text when editing starts
-    useEffect(() => {
-        if (editIndex !== null && inputRef.current) {
-            inputRef.current.focus();
-            inputRef.current.setSelectionRange(editedQuestion.length, editedQuestion.length);
+  const askQuestion = async () => {
+    if (!question.trim()) {
+      alert('Please enter a question.');
+      return;
+    }
+    setIsChatMode(true); // Enter chat mode
+    setLoading(true);
+    try {
+      const requestBody = {
+        question,
+        use_default: useDefaultPDF,
+      };
+      const response = await fetch('http://localhost:8000/ask_question/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to get a response');
+      }
+
+      setConversation((prev) => [
+        ...prev,
+        { question, response: result.response },
+      ]);
+      setQuestion('');
+    } catch (error) {
+      console.error('Error asking question:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Copied to clipboard!');
+    });
+  };
+
+  const startEditing = (index, currentQuestion) => {
+    setEditIndex(index);
+    setEditedQuestion(currentQuestion);
+  };
+
+  const saveEditedQuestion = async (index) => {
+    if (editedQuestion.trim()) {
+      setLoading(true);
+      try {
+        const requestBody = {
+          question: editedQuestion,
+          use_default: useDefaultPDF,
+        };
+        const response = await fetch('http://localhost:8000/ask_question/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to get a response');
         }
-    }, [editIndex, editedQuestion]);
 
-    return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl white font-bold mb-4">Multi PDF Chat</h1>
+        const updatedConversation = [...conversation];
+        updatedConversation[index] = {
+          question: editedQuestion,
+          response: result.response,
+        };
+        setConversation(updatedConversation);
+        setEditIndex(null);
+        setEditedQuestion('');
+      } catch (error) {
+        console.error('Error fetching response for edited question:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
-            {/* Toggle between Default PDF and Uploaded PDFs */}
+  useEffect(() => {
+    if (editIndex !== null && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(editedQuestion.length, editedQuestion.length);
+    }
+  }, [editIndex, editedQuestion]);
 
-            {/* Template Questions */}
-            <TemplateQuestions onTemplateClick={handleTemplateClick} />
-            <div className="mb-4">
-                <label className="inline-flex items-center">
+  
+
+
+  // UI 
+
+  return (
+    <div className="flex flex-col items-center justify-between h-screen p-4 bg-gray-900">
+      <h1 className="text-3xl font-bold mb-6 mt-6 text-center">Multi PDF Chat</h1>
+
+     {/* Show Template Questions and Initial Controls Only Before Chat Mode */}
+      {!isChatMode && (
+        <>
+          <TemplateQuestions onTemplateClick={handleTemplateClick} />
+          <div className="mb-4 flex justify-center items-center space-x-4">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                checked={useDefaultPDF}
+                onChange={() => setUseDefaultPDF(!useDefaultPDF)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+          <span className="ml-2 text-gray-400">Use Default PDF</span>
+        </label>
+      </div>
+      </>
+      )}
+
+      {/* Question Input and File Upload Section */}
+      <div className="flex mb-4 w-full max-w-2xlrounded-full bg-white shadow p-2 items-center">
+        <input
+          type="text"
+          placeholder="Ask a question about the PDFs"
+          value={question}
+          onChange={handleQuestionChange}
+          className="border p-2 rounded w-full text-gray-800"
+        />
+       
+       {/* Combined Upload and Process Functionality in Icon */}
+  <label className="ml-2 p-2 cursor-pointer text-blue-500 relative">
+    {loading ? (
+      <FaSpinner className="animate-spin" size={24} />
+    ) : (
+      <FiUpload size={24} />
+    )}
+    <input
+      type="file"
+      multiple
+      accept="application/pdf"
+      onChange={handleFileChangeAndProcess}
+      className="hidden"
+    />
+  </label>
+          {/* Ask Question Button */}
+        <button
+          onClick={askQuestion}
+          className="ml-2 bg-blue-500 p-2 rounded-full text-white hover:bg-blue-600"
+        >
+          <FiArrowRight size={18} />
+        </button>
+      </div>
+
+      {/* Show Conversation Only After Question is Asked */}
+      {isChatMode && conversation.length > 0 && (
+        <div className="bg-gray-900 p-4 rounded max-h-[400px] overflow-y-scroll w-full mb-4 flex-1">
+          {conversation.map((chat, index) => (
+            <div key={index} className="mb-4">
+              <div className="text-left">
+                <div className="bg-blue-500 text-white p-2 rounded flex items-center justify-between">
+                  {editIndex === index ? (
                     <input
-                        type="checkbox"
-                        checked={useDefaultPDF}
-                        onChange={() => setUseDefaultPDF(!useDefaultPDF)}
-                        className="form-checkbox h-5 w-5 text-blue-600"
+                      type="text"
+                      ref={inputRef}
+                      value={editedQuestion}
+                      onChange={(e) => setEditedQuestion(e.target.value)}
+                      className="bg-blue-500 text-white border-none w-full focus:ring-0"
+                      style={{ width: `${editedQuestion.length + 1}ch` }}
                     />
-                    <span className="ml-2 text-gray-700">Use Default PDF</span>
-                </label>
-            </div>
-            {/* File upload section */}
-            {!useDefaultPDF && (
-                <div className="mb-4">
-                    <input
-                        type="file"
-                        multiple
-                        accept="application/pdf"
-                        onChange={handleFileChange}
-                        className="mb-2"
-                    />
+                  ) : (
+                    <p>{chat.question}</p>
+                  )}
+                  <div className="flex space-x-2">
                     <button
-                        onClick={uploadFiles}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                        disabled={loading}
+                      onClick={() => (editIndex === index ? saveEditedQuestion(index) : startEditing(index, chat.question))}
+                      className="hover:text-gray-300"
                     >
-                        {loading ? 'Uploading...' : 'Upload PDFs'}
+                      <FiEdit />
                     </button>
+                    <button onClick={() => copyToClipboard(chat.question)} className="hover:text-gray-300">
+                      <FiCopy />
+                    </button>
+                  </div>
                 </div>
-            )}
-
-            {/* Conversation chat UI */}
-            <div className="bg-gray-100 p-4 rounded max-h-[500px] overflow-y-scroll mb-4">
-                {conversation.map((chat, index) => (
-                    <div key={index} className="mb-4">
-                        <div className="text-right">
-                            <div className="bg-blue-500 text-white p-2 rounded flex items-center">
-                                {/* Inline editing for the question */}
-                                {editIndex === index ? (
-                                    <input
-                                        type="text"
-                                        ref={inputRef} // Input reference
-                                        value={editedQuestion}
-                                        onChange={(e) => setEditedQuestion(e.target.value)}
-                                        className="bg-blue-500 text-white p-2 border-none focus:ring-0"
-                                        style={{ width: `${editedQuestion.length + 1}ch` }} // Dynamically adjust width based on length
-                                    />
-                                ) : (
-                                    <p>{chat.question}</p>
-                                )}
-
-                                <button
-                                    onClick={() =>
-                                        editIndex === index
-                                            ? saveEditedQuestion(index)
-                                            : startEditing(index, chat.question)
-                                    }
-                                    className="ml-2 text-white hover:text-gray-300"
-                                >
-                                    <FiEdit />
-                                </button>
-                                <button
-                                    onClick={() => copyToClipboard(chat.question)}
-                                    className="ml-2 text-white hover:text-gray-300"
-                                >
-                                    <FiCopy />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="text-left mt-2">
-                            <div className="bg-gray-300 text-black p-2 rounded flex items-center">
-                                <p>{chat.response}</p>
-                                <button
-                                    onClick={() => copyToClipboard(chat.response)}
-                                    className="ml-2 text-black hover:text-gray-600"
-                                >
-                                    <FiCopy />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+              </div>
+              <div className="text-left mt-2">
+                <div className="bg-gray-300 text-black p-2 rounded flex items-center justify-between">
+                  <p>{chat.response}</p>
+                  <button onClick={() => copyToClipboard(chat.response)} className="hover:text-gray-600">
+                    <FiCopy />
+                  </button>
+                </div>
+              </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            {/* Question input and button */}
-            <div className="mb-4">
-                <input
-                    type="text"
-                    placeholder="Ask a question about the PDFs"
-                    value={question}
-                    onChange={handleQuestionChange}
-                    className="border p-2 rounded w-full mb-2 text-gray-800"
-                />
-                <button
-                    onClick={askQuestion}
-                    className="bg-green-500 text-white px-4 py-2 rounded"
-                    disabled={loading}
-                >
-                    {loading ? 'Asking...' : 'Ask Question'}
-                </button>
-            </div>
+      {/* <button onClick={askQuestion} className="bg-green-500 text-white px-4 py-2 rounded w-full mt-2">
+        Ask Question
+      </button> */}
 
-       {/* Sign Out Button */}
-       <button onClick={signOut} className="mt-6 bg-gray-800 text-white py-2 px-4 rounded">
+      <button onClick={signOut} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
         Sign Out
       </button>
     </div>
