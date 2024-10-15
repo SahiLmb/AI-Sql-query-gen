@@ -44,7 +44,7 @@ const MultiPDFPage = () => {
     });
   
     try {
-      const response = await fetch('http://localhost:8000/process_pdfs/', {
+      const response = await fetch('https://multi-ai-r4v7.onrender.com/process_pdfs/', {
         method: 'POST',
         body: formData,
       });
@@ -75,7 +75,7 @@ const MultiPDFPage = () => {
         question,
         use_default: useDefaultPDF,
       };
-      const response = await fetch('http://localhost:8000/ask_question/', {
+      const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const MultiPDFPage = () => {
           question: editedQuestion,
           use_default: useDefaultPDF,
         };
-        const response = await fetch('http://localhost:8000/ask_question/', {
+        const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
