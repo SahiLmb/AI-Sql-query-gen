@@ -15,6 +15,7 @@ const MultiPDFPage = () => {
   const [isChatMode, setIsChatMode] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [editedQuestion, setEditedQuestion] = useState('');
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const { signOut } = useClerk();
   const inputRef = useRef(null);
@@ -44,7 +45,7 @@ const MultiPDFPage = () => {
     });
   
     try {
-      const response = await fetch('http://localhost:8000/process_pdfs/', {
+      const response = await fetch(`${API_URL}/process_pdfs/`, {
         method: 'POST',
         body: formData,
       });
@@ -75,7 +76,7 @@ const MultiPDFPage = () => {
         question,
         use_default: useDefaultPDF,
       };
-      const response = await fetch('http://localhost:8000/ask_question/', {
+      const response = await fetch(`${API_URL}/ask_question/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
