@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile,Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from PyPDF2 import PdfReader
@@ -121,6 +121,20 @@ async def process_pdfs(files: list[UploadFile] = File(...)):
 
     return JSONResponse(content={"status": "success", "message": "PDFs processed successfully."})
 
+# GET Endpoint to process PDFs (accepts file paths as query parameters)
+@app.get("/process_pdfs/")
+async def process_pdfs_get(file_paths: list[str] = Query(...)):
+    global conversation_chain
+    pdf_docs = []
+    for path in file_paths:
+        with open(path, "rb") as file:
+            pdf_docs.append(file.read())
+    raw_text = get_pdf_text(pdf_docs)
+    text_chunks = get_text_chunks(raw_text)
+    vectorstore = get_vectorstore(text_chunks)
+    conversation_chain = get_conversational_chain(vectorstore)
+
+    return
 
 # endpoint to reload the default PDF
 @app.get("/load_default_pdf/")
@@ -163,6 +177,25 @@ async def ask_question(data: Question):
         # Handle unexpected errors and log them
         print(f"Error processing question: {e}")
         return JSONResponse(content={"error": "Failed to process the question."}, status_code=500)
+
+
+# GET Endpoint to ask a question (takes a question as a query parameter)
+@app.get("/ask_question/")
+async def ask_question_get(question: str):
+    print(f"Processing question: {question}")
+    
+    if conversation_chain is None:
+        return JSONResponse(content={"error": "No conversation chain found. Please process PDFs first."}, status_code=400)
+    
+    try:
+        response = conversation_chain({'question': question})
+        response_text = response.get('answer', str(response))
+        return JSONResponse(content={"response": response_text})
+    except Exception as e:
+        print(f"Error processing question: {e}")
+        return JSONResponse(content={"error": "Failed to process the question."}, status_code=500)
+
+
 
 # @app.get("/default_pdf/")
 # async def get_default_pdf():
