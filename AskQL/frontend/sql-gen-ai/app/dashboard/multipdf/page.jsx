@@ -44,7 +44,7 @@ const MultiPDFPage = () => {
     });
   
     try {
-      const response = await fetch('/api/process_pdfs', {
+      const response = await fetch('http://localhost:8000/process_pdfs/', {
         method: 'POST',
         body: formData,
       });
@@ -75,7 +75,7 @@ const MultiPDFPage = () => {
         question,
         use_default: useDefaultPDF,
       };
-      const response = await fetch('/api/ask_question', {
+      const response = await fetch('http://localhost:8000/ask_question/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const MultiPDFPage = () => {
           question: editedQuestion,
           use_default: useDefaultPDF,
         };
-        const response = await fetch('/api/ask_question', {
+        const response = await fetch('http://localhost:8000/ask_question/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
