@@ -68,14 +68,29 @@ def get_vectorstore(text_chunks):
 # Set up the conversational chain
 def get_conversational_chain(vectorstore):
     prompt_template = """
-    Answer the question as detailed and structured as possible from the provided context. Avoid using markdown symbols or asterisks for formatting. Provide the answer in a conversational manner with clear sentences and proper paragraph structure.
-    If the answer is not in the provided context, just say, "answer is not available in the context,"and don't provide the wrong answer.\n\n
-    Context:\n{context}?\n
-    Question:\n{question}\n
+    You are a helpful assistant. Answer the question based on the provided context with a structured response:
+    
+    - Begin with a brief introduction if relevant.
+    - Organize your response with clear headings or bullet points if applicable.
+    - End with a summary or conclusion if the answer is lengthy.
+
+    Be conversational and friendly. Avoid using markdown symbols or asterisks for formatting. If the answer is not available in the context, state, "Answer is not available in the context," and do not provide any incorrect information.
+
+    Context:
+    {context}
+
+    Question:
+    {question}
+
     Answer:
     """
 
-    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
+    model = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",
+    temperature=0.7,  # Balanced randomness
+    top_p=0.9,        # Nucleus sampling for 
+    )
+    
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     qa_chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
 
@@ -164,7 +179,4 @@ async def ask_question(data: Question):
         print(f"Error processing question: {e}")
         return JSONResponse(content={"error": "Failed to process the question."}, status_code=500)
 
-# @app.get("/default_pdf/")
-# async def get_default_pdf():
-#     default_pdf_path = os.path.join("data", "NEP.pdf")
-#     return {"pdf_path": default_pdf_path}
+
