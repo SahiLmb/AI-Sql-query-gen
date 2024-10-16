@@ -5,6 +5,7 @@ import { FiArrowRight, FiCopy, FiEdit, FiUpload } from 'react-icons/fi';
 import { FaSpinner } from 'react-icons/fa';
 import TemplateQuestions from '../components/TemplateQuestions';
 import { useClerk } from '@clerk/nextjs';
+import { marked } from 'marked';
 
 const MultiPDFPage = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
@@ -18,6 +19,26 @@ const MultiPDFPage = () => {
 
   const { signOut } = useClerk();
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    // Fetch the default PDF when the component mounts
+    const fetchDefaultPDF = async () => {
+      try {
+        const response = await fetch('https://multi-ai-r4v7.onrender.com/load_default_pdf');
+        const result = await response.json();
+
+        if (response.ok) {
+          setPdfFiles(result.pdfFiles); // Assuming result contains pdfFiles array
+        } else {
+          console.error('Failed to load default PDF:', result.error);
+        }
+      } catch (error) {
+        console.error('Error fetching default PDF:', error);
+      }
+    };
+
+    fetchDefaultPDF();
+  }, []);
 
   const handleTemplateClick = (selectedQuestion) => {
     setQuestion(selectedQuestion);
@@ -148,6 +169,11 @@ const MultiPDFPage = () => {
     }
   };
 
+  const clearChat = () => {
+    setConversation([]);
+    setIsChatMode(false); // Reset chat mode
+  };
+
   useEffect(() => {
     if (editIndex !== null && inputRef.current) {
       inputRef.current.focus();
@@ -222,7 +248,7 @@ const MultiPDFPage = () => {
           {conversation.map((chat, index) => (
             <div key={index} className="mb-4">
               <div className="text-left">
-                <div className="bg-blue-500 text-white p-2 rounded flex items-center justify-between">
+                <div className="bg-blue-600 text-white p-3 rounded flex items-center justify-between">
                   {editIndex === index ? (
                     <input
                       type="text"
@@ -248,9 +274,10 @@ const MultiPDFPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="text-left mt-2">
-                <div className="bg-gray-300 text-black p-2 rounded flex items-center justify-between">
-                  <p>{chat.response}</p>
+              {/* Conversation box */}
+              <div className="text-left mt-3">
+                <div className="bg-gray-800 text-white p-4 rounded-xl flex items-start justify-between">
+                <div className="bg-gray-800 text-white p-3 rounded mt-2" dangerouslySetInnerHTML={{ __html: marked(chat.response) }} />
                   <button onClick={() => copyToClipboard(chat.response)} className="hover:text-gray-600">
                     <FiCopy />
                   </button>
@@ -261,11 +288,13 @@ const MultiPDFPage = () => {
         </div>
       )}
 
-      {/* <button onClick={askQuestion} className="bg-green-500 text-white px-4 py-2 rounded w-full mt-2">
-        Ask Question
-      </button> */}
+    {isChatMode && (
+            <button onClick={clearChat} className="bg-gray-700 text-white px-4 py-2 rounded-full mb-4 hover:bg-gray-600">
+              Clear Chat
+            </button>
+          )}
 
-      <button onClick={signOut} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+      <button onClick={signOut} className="mt-4 bg-red-500 text-white px-4 py-2 rounded-full">
         Sign Out
       </button>
     </div>
