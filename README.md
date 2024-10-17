@@ -87,11 +87,11 @@ Once both servers are running, navigate to http://localhost:3000 in your browser
 Type a query into the chat input box, and receive formatted responses from the AI.
 
 ### Contributing
-Fork the repository.
-Create a feature branch (git checkout -b feature/AmazingFeature).
-Commit your changes (git commit -m 'Add some AmazingFeature').
-Push to the branch (git push origin feature/AmazingFeature).
-Open a pull request.
+- Fork the repository.
+- Create a feature branch (git checkout -b feature/AmazingFeature).
+- Commit your changes (git commit -m 'Add some AmazingFeature').
+- Push to the branch (git push origin feature/AmazingFeature).
+- Open a pull request.
 
 
 
