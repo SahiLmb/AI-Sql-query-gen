@@ -40,7 +40,7 @@ This chat application leverages AI to generate responses for user queries and pr
    - The response from the AI model is processed with `markdown2` to convert markdown syntax to HTML for proper formatting.
 
 3. **Markdown Conversion**:
-   - If the AI response contains markdown, it is converted to HTML using `markdown2` in the backend or `marked` in the frontend.
+   - If the AI response contains markdown, it is converted to HTML using `marked` in the frontend.
    - The final response with HTML formatting is then sent to the frontend.
 
 4. **Deployment**:
