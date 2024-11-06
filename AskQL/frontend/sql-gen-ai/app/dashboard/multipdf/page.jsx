@@ -10,6 +10,7 @@ import { marked } from 'marked';
 const MultiPDFPage = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [question, setQuestion] = useState('');
+  const [language, setLanguage] = useState('English');  // New state for language
   const [loading, setLoading] = useState(false);
   const [conversation, setConversation] = useState([]);
   const [useDefaultPDF, setUseDefaultPDF] = useState(true);
@@ -24,7 +25,7 @@ const MultiPDFPage = () => {
     // Fetch the default PDF when the component mounts
     const fetchDefaultPDF = async () => {
       try {
-        const response = await fetch('https://multi-ai-r4v7.onrender.com/load_default_pdf');
+        const response = await fetch('http://localhost:8000/load_default_pdf');
         const result = await response.json();
 
         if (response.ok) {
@@ -65,7 +66,7 @@ const MultiPDFPage = () => {
     });
   
     try {
-      const response = await fetch('https://multi-ai-r4v7.onrender.com/process_pdfs/', {
+      const response = await fetch('http://localhost:8000/process_pdfs/', {
         method: 'POST',
         body: formData,
       });
@@ -95,8 +96,9 @@ const MultiPDFPage = () => {
       const requestBody = {
         question,
         use_default: useDefaultPDF,
+        language,  // Passing the selected language here
       };
-      const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
+      const response = await fetch('http://localhost:8000/ask_question/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,8 +141,9 @@ const MultiPDFPage = () => {
         const requestBody = {
           question: editedQuestion,
           use_default: useDefaultPDF,
+          language,  // Passing the selected language here
         };
-        const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
+        const response = await fetch('http://localhost:8000/ask_question/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -207,6 +210,19 @@ const MultiPDFPage = () => {
       </div>
       </>
       )}
+
+       {/* Language Selection */}
+        <div className="mb-4 flex justify-center items-center">
+        <label className="text-gray-400 mr-2">Language:</label>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className="p-2 bg-gray-700 text-white rounded"
+        >
+          <option value="English">English</option>
+          <option value="Hinglish">Hinglish</option>
+        </select>
+      </div>
 
       {/* Question Input and File Upload Section */}
       <div className="flex mb-4 w-full max-w-2xlrounded-full bg-white shadow p-2 items-center">
