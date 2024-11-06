@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useRef } from 'react';
 import axios from 'axios';
@@ -22,6 +22,11 @@ const MultiSQLPage = () => {
     const [dbHost, setDbHost] = useState('');
     const [dbPort, setDbPort] = useState('');
     const [dbName, setDbName] = useState('');
+
+    // Determine the backend URL based on the hostname
+    const backendURL = window.location.hostname === 'localhost'
+        ? 'http://localhost:8000'
+        : 'https://multi-ai-r4v7.onrender.com';
 
     const handleQueryChange = (event) => setUserQuery(event.target.value);
     const handleDbUserChange = (event) => setDbUser(event.target.value);
@@ -48,7 +53,7 @@ const MultiSQLPage = () => {
         };
 
         try {
-            const response = await axios.post('http://localhost:8000/sql-query', data);
+            const response = await axios.post(`${backendURL}/sql-query`, data);
             setResponse(response.data.response);
             setChatHistory([...chatHistory, { user: userQuery, ai: response.data.response }]);
             setUserQuery('');
@@ -191,8 +196,6 @@ const MultiSQLPage = () => {
                     ))}
                 </div>
             )}
-
-            
 
             <button
                 onClick={clearChat}

@@ -7,6 +7,12 @@ import TemplateQuestions from '../components/TemplateQuestions';
 import { useClerk } from '@clerk/nextjs';
 import { marked } from 'marked';
 
+// Define the backend URL based on the environment
+const backendUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'https://multi-ai-r4v7.onrender.com'
+    : 'http://localhost:8000';
+
 const MultiPDFPage = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [question, setQuestion] = useState('');
@@ -25,7 +31,7 @@ const MultiPDFPage = () => {
     // Fetch the default PDF when the component mounts
     const fetchDefaultPDF = async () => {
       try {
-        const response = await fetch('http://localhost:8000/load_default_pdf');
+        const response = await fetch(`${backendUrl}/load_default_pdf`);
         const result = await response.json();
 
         if (response.ok) {
@@ -66,7 +72,7 @@ const MultiPDFPage = () => {
     });
   
     try {
-      const response = await fetch('http://localhost:8000/process_pdfs/', {
+      const response = await fetch(`${backendUrl}/process_pdfs/`, {
         method: 'POST',
         body: formData,
       });
@@ -98,7 +104,7 @@ const MultiPDFPage = () => {
         use_default: useDefaultPDF,
         language,  // Passing the selected language here
       };
-      const response = await fetch('http://localhost:8000/ask_question/', {
+      const response = await fetch(`${backendUrl}/ask_question/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +149,7 @@ const MultiPDFPage = () => {
           use_default: useDefaultPDF,
           language,  // Passing the selected language here
         };
-        const response = await fetch('http://localhost:8000/ask_question/', {
+        const response = await fetch(`${backendUrl}/ask_question/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
