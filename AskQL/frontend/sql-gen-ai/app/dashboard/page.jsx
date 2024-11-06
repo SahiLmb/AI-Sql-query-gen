@@ -20,6 +20,13 @@ export default function Dashboard() {
           </div>
           
         </Link>
+
+        <Link href="/dashboard/multisql">
+          <div className="bg-blue-500 text-white py-4 px-6 rounded cursor-pointer mt-4 hover:bg-blue-600">
+            AI-Powered Sql Chat Interface
+          </div>
+          
+        </Link>
       </div>
 
       {/* Sign Out Button */}
