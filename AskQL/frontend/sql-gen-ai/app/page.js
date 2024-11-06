@@ -6,55 +6,86 @@ export default function Home() {
   const router = useRouter();
 
   const handleLoginClick = () => {
-    // Manually redirect to the sign-in page on button click
     router.push('/sign-in');
   };
 
+  const handleMultiSQLClick = () => {
+    router.push('/dashboard/multisql');
+  };
+
+  const handleMultiPDFClick = () => {
+    router.push('/dashboard/multipdf');
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      {/* Top-right Login button */}
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={handleLoginClick}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-        >
-          Login
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-900 text-white flex flex-col items-center">
+      {/* Header with Navigation Links */}
+      <header className="w-full bg-gray-900 py-4 px-8 flex justify-between items-center shadow-lg">
+        <h1 className="text-2xl font-bold">AI-Powered Query App</h1>
+        <nav className="space-x-4">
+          <button onClick={handleMultiSQLClick} className="hover:text-blue-400">
+            Multi SQL Query
+          </button>
+          <button onClick={handleMultiPDFClick} className="hover:text-blue-400">
+            Multi PDF Chat
+          </button>
+          <button
+            onClick={handleLoginClick}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+          >
+            Login
+          </button>
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center mt-16 px-4 text-center">
+        <h2 className="text-5xl font-bold mb-8">
+          Welcome to the AI-Powered Multi Query Platform
+        </h2>
+        <p className="text-lg mb-12 max-w-2xl">
+          Seamlessly interact with SQL databases and PDF documents using AI-driven queries.
+          Log in to get started and explore both features below!
+        </p>
+
+        {/* Features Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-8">
+          {/* Multi SQL Query Feature */}
+          <div className="bg-gray-700 p-8 rounded-3xl shadow-lg text-center">
+            <h3 className="text-3xl font-semibold mb-4">Multi SQL Query</h3>
+            <p className="mb-4">
+              Effortlessly connect to databases, input SQL queries, and get AI-generated answers.
+              Perfect for quick data retrieval and analysis from multiple sources.
+            </p>
+            <button
+              onClick={handleMultiSQLClick}
+              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full"
+            >
+              Explore Multi SQL Query
+            </button>
+          </div>
+
+          {/* Multi PDF Chat Feature */}
+          <div className="bg-gray-800 p-8 rounded-3xl shadow-lg text-center">
+            <h3 className="text-3xl font-semibold mb-4">Multi PDF Chat</h3>
+            <p className="mb-4">
+              Upload PDFs and ask questions. Get AI-powered answers directly from the content of
+              your documents.
+            </p>
+            <button
+              onClick={handleMultiPDFClick}
+              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full"
+            >
+              Explore Multi PDF Chat
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Main content centered */}
-      <div className="mt-16 text-center">
-        <h1 className="text-4xl font-bold mb-6">Welcome to Multi PDF Chat App</h1>
-        <p className="text-lg mb-4">Interact with multiple PDFs and get answers from AI based on PDF content!</p>
-        <p className="mb-8">Please log in to access the dashboard and upload your PDFs.</p>
-
-        <button
-          onClick={handleLoginClick}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-        >
-          Get Started!
-        </button>
-      </div>
-
-      {/* Steps section in a single row */}
-      <div className="flex justify-between items-center w-full px-4 mt-12 space-x-4">
-        <div className="bg-gray-600 p-4 flex-1 rounded shadow-lg text-center">
-          <h3 className="text-xl font-semibold mb-2">Step 1</h3>
-          <p>Login to your account to access the app.</p>
-        </div>
-        <div className="bg-gray-700 p-4 flex-1 rounded shadow-lg text-center">
-          <h3 className="text-xl font-semibold mb-2">Step 2</h3>
-          <p>Upload PDFs to enable AI-powered question answering.</p>
-        </div>
-        <div className="bg-gray-800 p-4 flex-1 rounded shadow-lg text-center">
-          <h3 className="text-xl font-semibold mb-2">Step 3</h3>
-          <p>Ask questions based on the content of the uploaded PDFs.</p>
-        </div>
-        <div className="bg-gray-900 p-4 flex-1 rounded shadow-lg text-center">
-          <h3 className="text-xl font-semibold mb-2">Step 4</h3>
-          <p>Get answers in real-time directly from the app.</p>
-        </div>
-      </div>
+      {/* Footer */}
+      <footer className="mt-16 mb-8 text-gray-400 text-center">
+        <p>© 2024 AI Query App. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
