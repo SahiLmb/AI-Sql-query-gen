@@ -25,7 +25,7 @@ const MultiPDFPage = () => {
     // Fetch the default PDF when the component mounts
     const fetchDefaultPDF = async () => {
       try {
-        const response = await fetch('https://multi-ai-r4v7.onrender.com/load_default_pdf/');
+        const response = await fetch('https://ai-query-gen.onrender.com/load_default_pdf/');
         const result = await response.json();
 
         if (response.ok) {
@@ -66,7 +66,7 @@ const MultiPDFPage = () => {
     });
   
     try {
-      const response = await fetch('https://multi-ai-r4v7.onrender.com/process_pdfs/', {
+      const response = await fetch('https://ai-query-gen.onrender.com/process_pdfs/', {
         method: 'POST',
         body: formData,
       });
@@ -98,7 +98,7 @@ const MultiPDFPage = () => {
         use_default: useDefaultPDF,
         language,  // Passing the selected language here
       };
-      const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
+      const response = await fetch('https://ai-query-gen.onrender.com/ask_question/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ const MultiPDFPage = () => {
           use_default: useDefaultPDF,
           language,  // Passing the selected language here
         };
-        const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
+        const response = await fetch('https://ai-query-gen.onrender.com/ask_question/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

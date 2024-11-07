@@ -48,7 +48,7 @@ const MultiSQLPage = () => {
         };
 
         try {
-            const response = await axios.post('https://multi-ai-r4v7.onrender.com/sql-query/', data);
+            const response = await axios.post('https://ai-query-gen.onrender.com/sql-query/', data);
             setResponse(response.data.response);
             setChatHistory([...chatHistory, { user: userQuery, ai: response.data.response }]);
             setUserQuery('');
