@@ -21,7 +21,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-900 text-white flex flex-col items-center">
       {/* Header with Navigation Links */}
       <header className="w-full bg-gray-900 py-4 px-8 flex justify-between items-center shadow-lg">
-        <h1 className="text-2xl font-bold">AI-Powered Query App</h1>
+        <h1 className="text-2xl font-bold">Mult-AI</h1>
         <nav className="space-x-4">
           <button onClick={handleMultiSQLClick} className="hover:text-blue-400">
             Multi SQL Query
