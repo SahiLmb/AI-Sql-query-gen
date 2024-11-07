@@ -143,7 +143,7 @@ const MultiPDFPage = () => {
           use_default: useDefaultPDF,
           language,  // Passing the selected language here
         };
-        const response = await fetch('https://multi-ai-r4v7.onrender.com/ask-question/', {
+        const response = await fetch('https://multi-ai-r4v7.onrender.com/ask_question/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
