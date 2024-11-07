@@ -7,7 +7,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables if needed
+load_dotenv()  # Load environment variables
 
 # Initialize database connection
 def init_database(user: str, password: str, host: str, port: str, database: str) -> SQLDatabase:

@@ -205,7 +205,7 @@ const MultiPDFPage = () => {
                 onChange={() => setUseDefaultPDF(!useDefaultPDF)}
                 className="form-checkbox h-5 w-5 text-blue-600"
               />
-          <span className="ml-2 text-gray-400">Use Default PDF</span>
+          <span className="ml-2 text-gray-400">Load Default PDF(National Education Policy 2020)</span>
         </label>
       </div>
       </>
