@@ -42,10 +42,10 @@ Unlock the power of AI with **Mult-AI** and experience:
 ### Deployment: Vercel (Frontend), Render (Backend)
 
 ## Features
-- **AI-Generated Responses**: Uses an AI model to generate responses based on user inputs.
 - **Multi SQL Query**: Connect to SQL databases, input natural language queries, and receive 
     AI-generated SQL responses.
 - **Multi PDF Chat**: Upload PDFs, ask questions, and get answers from AI based on the PDF content.
+- **Hinglish Support**: Interact with the AI in Hinglish (a blend of Hindi and English), enabling a more natural experience for multilingual users. Powered by the **Deep Translator** library, Mult-AI bridges language gaps effortlessly!
 - **HTML Formatted Output**: Ensures that text is displayed with proper formatting (e.g., bold text) without using markdown symbols.
 - **Responsive Design**: Tailwind CSS for a responsive and modern UI.
 
