@@ -4,12 +4,7 @@ Mult-AI is an innovative platform that combines powerful AI capabilities to make
 
 ---
 
-Unlock the power of AI with **Mult-AI** and experience:
-- 🗃️ **SQL Query Generation**: Ask questions in plain English and get SQL answers.
-- 📄 **Multi PDF Chat**: Upload PDFs and chat with AI to get instant insights from document content.
-- 🔒 **User-Friendly Access**: Secure login and personalized dashboard.
-
-**Get started today and transform how you interact with your data!**
+To know more about the app's functionality head over to this [README.md](AskQL/README.md) file
 
 ## Table of Contents
 - [Technologies Used](#technologies-used)
@@ -38,16 +33,19 @@ Unlock the power of AI with **Mult-AI** and experience:
 - **Google Gemini API**: Used for extracting texts from pdf and generating natural language response.
 - **Groq API**: Used to create and process sql chain and generate response in natural language with respect to the user's question based on database.
 
-### Authentication: Clerk
-### Deployment: Vercel (Frontend), Render (Backend)
+#### Authentication: Clerk
+#### Deployment: Vercel (Frontend), Render (Backend)
 
 ## Features
-- **Multi SQL Query**: Connect to SQL databases, input natural language queries, and receive 
-    AI-generated SQL responses.
-- **Multi PDF Chat**: Upload PDFs, ask questions, and get answers from AI based on the PDF content.
-- **Hinglish Support**: Interact with the AI in Hinglish (a blend of Hindi and English), enabling a more natural experience for multilingual users. Powered by the **Deep Translator** library, Mult-AI bridges language gaps effortlessly!
-- **HTML Formatted Output**: Ensures that text is displayed with proper formatting (e.g., bold text) without using markdown symbols.
-- **Responsive Design**: Tailwind CSS for a responsive and modern UI.
+
+- \🗃️ **Multi SQL Query**: Connect to SQL databases, input natural language queries, and receive AI-generated SQL responses instantly.
+- 📄 **Multi PDF Chat**: Upload PDFs, ask questions, and get AI-generated answers based on the content of your documents.
+- 🌐🇮🇳 **Hinglish Support**: Communicate with the AI in Hinglish (a blend of Hindi and English), creating a more natural experience for multilingual users. Powered by the **Deep Translator** library, Mult-AI bridges language gaps effortlessly!
+- 🖋️ **HTML Formatted Output**: Enjoy responses with proper HTML formatting, ensuring clean and readable output without the hassle of markdown symbols.
+- 📱 **Responsive Design**: Built with Tailwind CSS, the UI is optimized for a smooth experience on both desktop and mobile devices.
+
+**Unlock a new way to query and interact with your data, all in one intuitive platform!** 🚀
+
 
 ## Project Workflow
 
