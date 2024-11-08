@@ -83,9 +83,3 @@ The image is a flowchart illustrating the workflow of a system that processes us
   <img src="public/sql4.png" alt="sys-overview-gif" width="80%" />
 </p>
 <br>
-
-## Discount mail is sent to the user
-<p align="center">
-  <img src="pricetracker/public/Snapshots/9.png" alt="sys-overview-gif" width="80%" />
-</p>
-<br>
