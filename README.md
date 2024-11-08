@@ -1,15 +1,24 @@
-# Chat Application with AI-Generated Responses
+# 🌐🤖 Mult-AI: Your All-in-One AI Query Solution
 
-This chat application leverages AI to generate responses for user queries and provides formatted output without markdown symbols. The app is built using modern frontend and backend technologies, including React, FastAPI, Tailwind CSS, and Markdown-to-HTML processing.
+Mult-AI is an innovative platform that combines powerful AI capabilities to make querying SQL databases and PDF documents effortless. With Mult-AI, interact seamlessly with databases through natural language and get answers based on PDF content—all within a single, easy-to-use interface!
+
+---
+
+Unlock the power of AI with **Mult-AI** and experience:
+- 🗃️ **SQL Query Generation**: Ask questions in plain English and get SQL answers.
+- 📄 **Multi PDF Chat**: Upload PDFs and chat with AI to get instant insights from document content.
+- 🔒 **User-Friendly Access**: Secure login and personalized dashboard.
+
+**Get started today and transform how you interact with your data!**
 
 ## Table of Contents
 - [Technologies Used](#technologies-used)
 - [Features](#features)
 - [Project Workflow](#project-workflow)
 - [Installation](#installation)
+- [Setting up Environment Variables](#setting-up-environment-variables)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Technologies Used
 
@@ -23,9 +32,20 @@ This chat application leverages AI to generate responses for user queries and pr
 - **FastAPI**: A modern, fast web framework for building APIs with Python 3.7+ based on standard Python type hints.
 - **Markdown2**: A Python library to convert markdown text to HTML on the backend.
 - **Uvicorn**: An ASGI server for serving FastAPI applications in production.
+- **AWS RDS,EC2**: Cloud based data storage for getting public endpoint.
+
+### API
+- **Google Gemini API**: Used for extracting texts from pdf and generating natural language response.
+- **Groq API**: Used to create and process sql chain and generate response in natural language with respect to the user's question based on database.
+
+### Authentication: Clerk
+### Deployment: Vercel (Frontend), Render (Backend)
 
 ## Features
 - **AI-Generated Responses**: Uses an AI model to generate responses based on user inputs.
+- **Multi SQL Query**: Connect to SQL databases, input natural language queries, and receive 
+    AI-generated SQL responses.
+- **Multi PDF Chat**: Upload PDFs, ask questions, and get answers from AI based on the PDF content.
 - **HTML Formatted Output**: Ensures that text is displayed with proper formatting (e.g., bold text) without using markdown symbols.
 - **Responsive Design**: Tailwind CSS for a responsive and modern UI.
 
@@ -82,7 +102,33 @@ npm install
 npm run dev
 ```
 
+### Setting up Environment Variables
+Create a .env.local file in the root directory in frontend and add the following environment variables:
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key
+CLERK_SECRET_KEY=your_secret_key
+
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+
+NEXT_PUBLIC_API_URL=your_api_url
+```
+
 ### Usage
+
+#### Accessing Multi SQL Query
+- Navigate to the Multi SQL Query Feature: Use the "Multi SQL Query" link in the header to go to the SQL querying section.
+- Upload SQL Database: Upload your SQL database file to start querying.
+- Ask Questions: Enter questions in natural language. The AI model will convert these into SQL queries and fetch answers directly from your database.
+
+#### Accessing Multi PDF Chat
+- Navigate to the Multi PDF Chat Feature: Use the "Multi PDF Chat" link in the header.
+- Upload PDFs: Upload one or more PDF files.
+- Ask Questions: Ask questions about the content in the PDFs. The AI will analyze the content and provide answers based on the information within the uploaded documents.
+
 Once both servers are running, navigate to http://localhost:3000 in your browser to access the application.
 Type a query into the chat input box, and receive formatted responses from the AI.
 
